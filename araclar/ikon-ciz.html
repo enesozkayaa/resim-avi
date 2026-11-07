@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  Resim Avı - uygulama simgesini çizer: mor zemin, yelpaze gibi açılmış fotoğraf kartları + büyüteç.
+  Adres sonuna ?boyut=512&pay=0.08 yazılır (pay: kenar boşluğu; "maskable" simgede daha büyük).
+  PNG için: msedge --headless --hide-scrollbars --window-size=512,512 --screenshot=ikonlar/ikon-512.png "file:///.../araclar/ikon-ciz.html?boyut=512&pay=0.08"
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<style>html, body { margin: 0; background: #1d1436; overflow: hidden; } canvas { display: block; }</style>
+</head>
+<body>
+<script>
+  const ayar = new URLSearchParams(location.search);
+  const boyut = +(ayar.get('boyut') || 512);
+  const pay = +(ayar.get('pay') || 0.08);
+  const c = document.createElement('canvas');
+  c.width = c.height = boyut;
+  document.body.appendChild(c);
+  const g = c.getContext('2d');
+  g.scale(boyut / 512, boyut / 512);
+
+  const arka = g.createRadialGradient(256, 200, 30, 256, 256, 420);
+  arka.addColorStop(0, '#5a36a8');
+  arka.addColorStop(1, '#140d28');
+  g.fillStyle = arka;
+  g.fillRect(0, 0, 512, 512);
+
+  g.save();
+  const k = 1 - pay;
+  g.translate(256, 256); g.scale(k, k); g.translate(-256, -256);
+
+  // Fotoğraf kartı: krem çerçeve + içinde küçük bir manzara
+  function kart(x, y, aci, manzara) {
+    g.save(); g.translate(x, y); g.rotate(aci);
+    g.shadowColor = '#000a'; g.shadowBlur = 24; g.shadowOffsetY = 10;
+    g.fillStyle = '#fff8ec'; g.beginPath(); g.roundRect(-90, -135, 180, 270, 18); g.fill();
+    g.shadowColor = 'transparent';
+    g.save(); g.beginPath(); g.roundRect(-78, -123, 156, 246, 10); g.clip();
+    manzara();
+    g.restore();
+    g.restore();
+  }
+  const gunbatimi = () => {
+    const s = g.createLinearGradient(0, -123, 0, 123);
+    s.addColorStop(0, '#ff7eb3'); s.addColorStop(0.55, '#ffcf5a'); s.addColorStop(0.56, '#2a5a8a'); s.addColorStop(1, '#14304f');
+    g.fillStyle = s; g.fillRect(-80, -125, 160, 250);
+    g.fillStyle = '#fff3b0'; g.beginPath(); g.arc(0, 10, 28, Math.PI, 0); g.fill();
+  };
+  const dag = () => {
+    const s = g.createLinearGradient(0, -123, 0, 123);
+    s.addColorStop(0, '#8fd3ff'); s.addColorStop(1, '#e8f6ff');
+    g.fillStyle = s; g.fillRect(-80, -125, 160, 250);
+    g.fillStyle = '#3d6b4f'; g.beginPath(); g.moveTo(-80, 125); g.lineTo(-20, -10); g.lineTo(20, 40); g.lineTo(55, -40); g.lineTo(80, 10); g.lineTo(80, 125); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.moveTo(-20, -10); g.lineTo(-34, 16); g.lineTo(-8, 12); g.fill();
+  };
+  const gece = () => {
+    g.fillStyle = '#1b2b5a'; g.fillRect(-80, -125, 160, 250);
+    g.fillStyle = '#fff6c8'; g.beginPath(); g.arc(30, -60, 30, 0, 7); g.fill();
+    g.fillStyle = '#1b2b5a'; g.beginPath(); g.arc(44, -70, 26, 0, 7); g.fill();
+    g.fillStyle = '#fff'; [[-50, -90], [-30, -40], [-60, 10], [10, 0], [50, 30]].forEach(([a, b]) => { g.beginPath(); g.arc(a, b, 3, 0, 7); g.fill(); });
+    g.fillStyle = '#0d1430'; g.fillRect(-80, 70, 160, 60);
+  };
+  kart(160, 285, -0.32, dag);
+  kart(352, 285, 0.32, gece);
+  kart(256, 255, 0, gunbatimi);
+
+  // Büyüteç
+  g.save(); g.translate(330, 340);
+  g.shadowColor = '#000a'; g.shadowBlur = 18; g.shadowOffsetY = 8;
+  g.strokeStyle = '#ffcf5a'; g.lineWidth = 22; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(52, 52); g.lineTo(110, 110); g.stroke();
+  g.shadowColor = 'transparent';
+  g.fillStyle = '#ffffff33'; g.beginPath(); g.arc(0, 0, 70, 0, 7); g.fill();
+  g.strokeStyle = '#ffcf5a'; g.lineWidth = 18; g.beginPath(); g.arc(0, 0, 70, 0, 7); g.stroke();
+  g.strokeStyle = '#ffffffaa'; g.lineWidth = 8; g.beginPath(); g.arc(0, 0, 46, Math.PI * 1.1, Math.PI * 1.45); g.stroke();
+  g.restore();
+  g.restore();
+</script>
+</body>
+</html>

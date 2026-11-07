@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1d1436">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Resim Avı</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="ikonlar/ikon-192.png">
+  <link rel="apple-touch-icon" href="ikonlar/ikon-192.png">
+  <link rel="preconnect" href="https://picsum.photos">
+  <link rel="preconnect" href="https://fastly.picsum.photos">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ana menü + bekleme odası -->
+  <section id="menu">
+    <div class="kart">
+      <div class="baslikIkon">📸🔍</div>
+      <h1>Resim Avı</h1>
+      <p class="alt">Bir fotoğraf, bir söz… Anlatıcının kartını bul!</p>
+      <p id="onlineSayi" hidden></p>
+      <div id="girisAlani">
+        <label>Adın <input id="adim" maxlength="12" placeholder="Adını yaz" autocomplete="off"></label>
+        <button id="odaKurBtn" class="buyuk">🏠 Oda kur</button>
+        <div class="katilSatiri">
+          <input id="odaKoduGir" maxlength="5" placeholder="Oda kodu" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button id="katilBtn">Katıl</button>
+        </div>
+        <button id="geriDonBtn" class="ikinciBtn" hidden></button>
+        <p class="not">Bot yok: arkadaşlarınla oynanır. 3-8 kişi. 🎤 ile sesli konuşabilirsiniz.</p>
+      </div>
+      <div id="onlineDurum"></div>
+      <!-- Bekleme odası -->
+      <div id="lobi" hidden>
+        <div class="odaKodu" id="lobiKod"></div>
+        <h3>👥 Oyuncular <small id="lobiSayi"></small></h3>
+        <div id="lobiListe"></div>
+        <div class="ayarlar">
+          <h3>⚙️ Oyun ayarları <small id="ayarNotu"></small></h3>
+          <div class="secenek" data-ayar="bitis"><span>Oyun ne zaman bitsin?</span><button data-deger="puan">🏁 30 puana ilk ulaşan</button><button data-deger="tur">🔁 Herkes 2 kez anlatınca</button></div>
+        </div>
+        <button id="baslatBtn" class="buyuk">▶️ Oyunu başlat</button>
+        <p id="baslatNot" class="not"></p>
+      </div>
+      <button id="odaIptalBtn" class="ikinciBtn" hidden>❌ Odayı kapat</button>
+      <details>
+        <summary>Nasıl oynanır?</summary>
+        <ul>
+          <li>Herkesin elinde <b>6 fotoğraf kartı</b> var. Kendi elini sadece sen görürsün.</li>
+          <li>Sırası gelen <b>anlatıcı 🗣️</b> elinden bir kart seçer ve ona bir <b>söz</b> söyler: bir kelime, bir cümle, bir şarkı adı… ne istersen.</li>
+          <li>Diğerleri ellerinden o söze en uyan kartı <b>gizlice</b> atar.</li>
+          <li>Kartlar karıştırılıp açılır. Anlatıcı dışındaki herkes <b>“anlatıcının kartı hangisi?”</b> diye oy verir (kendi kartına oy veremezsin).</li>
+          <li><b>Puan:</b> Herkes bulursa ya da kimse bulamazsa anlatıcı 0, diğerleri 2'şer puan alır. Arada bir sonuç çıkarsa anlatıcı ve bulanlar 3'er puan alır.</li>
+          <li>Ayrıca senin kartına kanıp oy veren her kişi için <b>+1</b> puan alırsın.</li>
+          <li>İpucu: Sözün ne çok kolay ne çok zor olsun. Bazıları bulsun, bazıları bulamasın!</li>
+        </ul>
+      </details>
+      <p class="not">Fotoğraflar: <a href="https://picsum.photos" target="_blank" rel="noopener">Lorem Picsum</a> / Unsplash.</p>
+    </div>
+  </section>
+
+  <!-- Oyun -->
+  <section id="oyun" hidden>
+    <header id="ust">
+      <button id="menuBtn" title="Ana menü">☰</button>
+      <div id="puanlar"></div>
+      <div class="sagDugmeler">
+        <span id="odaBilgisi" hidden></span>
+        <button id="sohbetBtn" title="Sohbet">💬<span id="okunmamis" hidden></span></button>
+        <button id="sesliBtn" title="Sesli sohbet">🎤</button>
+        <button id="sesBtn" title="Ses">🔊</button>
+      </div>
+    </header>
+    <div id="durumYazi"></div>
+    <div class="sureCubugu"><div id="sure"></div></div>
+    <main id="alan">
+      <div id="sozKutusu" hidden></div>
+      <div id="masaBaslik"></div>
+      <div id="masa"></div>
+      <div id="sonucAlt" hidden></div>
+      <div id="elBaslik"></div>
+      <div id="el"></div>
+      <div id="gecmisPaneli" hidden>
+        <h4>📜 Önceki turlar</h4>
+        <div id="gecmisListe"></div>
+      </div>
+    </main>
+    <div id="mesaj"></div>
+  </section>
+
+  <!-- Kartı büyük göster + eylem -->
+  <section id="onizleme" class="perde" hidden>
+    <div class="onizKutu">
+      <img id="onizResim" alt="">
+      <div id="onizEylem"></div>
+      <button id="onizKapat" class="ikinciBtn">Kapat</button>
+    </div>
+  </section>
+
+  <!-- Oyun sonu -->
+  <section id="sonEkran" class="perde" hidden>
+    <div class="kart genis">
+      <h2 id="sonBaslik"></h2>
+      <div id="sonSiralama"></div>
+      <h3>🖼️ Anlatıcıların kartları</h3>
+      <div id="galeri"></div>
+      <button id="lobiyeDonBtn" class="buyuk">🔁 Aynı oyuncularla tekrar</button>
+      <p id="sonBekle" class="not" hidden>⏳ Oda sahibi yeni oyunu başlatınca bekleme odasına döneceksiniz.</p>
+      <button id="sonKapatBtn" class="ikinciBtn">Masaya bak</button>
+    </div>
+  </section>
+
+  <!-- Sohbet -->
+  <section id="sohbetPaneli" class="perde" hidden>
+    <div class="kart">
+      <h2>💬 Sohbet</h2>
+      <div id="sohbetListe"></div>
+      <form id="sohbetForm"><input id="sohbetYazi" maxlength="140" placeholder="Mesaj yaz..." autocomplete="off"><button>Gönder</button></form>
+      <button id="sohbetKapat" class="ikinciBtn">Kapat</button>
+    </div>
+  </section>
+
+  <!-- Bağlantı koptu -->
+  <section id="baglantiEkrani" class="perde" hidden>
+    <div class="kart">
+      <h2>📡 Bağlantı koptu</h2>
+      <p>Oda sahibiyle bağlantın kesildi. İnternetin geldiyse yeniden bağlan; kaldığın yerden devam edersin.</p>
+      <button id="yenidenBaglanBtn" class="buyuk">🔁 Yeniden bağlan</button>
+      <button id="baglantiCikBtn" class="ikinciBtn">🏠 Ana menü</button>
+    </div>
+  </section>
+
+  <script src="ses.js"></script>
+  <script src="resimler.js"></script>
+  <script src="motor.js"></script>
+  <script src="oyun.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="ag.js"></script>
+  <script src="sayac.js"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>
