@@ -200,6 +200,8 @@ const Motor = (() => {
       oyuncular: o.oyuncular.map(p => ({ id: p.id, ad: p.ad, puan: p.puan, anlatti: p.anlatti,
         oynadi: o.oynanan[p.id] !== undefined, oyVerdi: o.oylar[p.id] !== undefined })),
       sonuc: goster ? o.sonuc : null,
+      // Anlatıcı oy vermediği için oylamada hangi kartı kimin attığını görebilir
+      sahipler: o.asama === 'oy' && id === anlatici().id ? Object.fromEntries(Object.entries(o.oynanan).map(([pid, k]) => [k, pid])) : null,
       gecmis: o.gecmis, kazananlar: o.kazananlar,
     };
   }

@@ -173,8 +173,12 @@ function ciz() {
     masaBaslik = '🂠 Masaya atılan kartlar (kapalı)';
     masa = d.oyuncular.map(p => `<div class="foto arka${p.oynadi ? '' : ' bos'}">${p.oynadi ? '❓' : ''}</div>`).join('');
   } else if (d.asama === 'oy') {
-    masaBaslik = '🃏 Masadaki kartlar: büyütmek için dokun';
-    masa = d.masa.map((k, i) => fotoHtml(k, `${k === d.benimKart ? ' benim' : ''}${k === d.benimOy ? ' oyum' : ''}`, `<span class="no">${i + 1}</span>`)).join('');
+    masaBaslik = ben ? '🃏 Masadaki kartlar: kimin hangisini attığını sadece sen görüyorsun' : '🃏 Masadaki kartlar: büyütmek için dokun';
+    masa = d.masa.map((k, i) => {
+      const sahip = d.sahipler?.[k];   // sadece anlatıcıya gelir
+      const etiket = sahip ? `<span class="sahip">${sahip === ui.benimId ? '🗣️ Senin kartın' : guvenli(adi(sahip))}</span>` : `<span class="no">${i + 1}</span>`;
+      return fotoHtml(k, `${k === d.benimKart && !sahip ? ' benim' : ''}${k === d.benimOy ? ' oyum' : ''}${sahip === ui.benimId ? ' dogru' : ''}`, etiket);
+    }).join('');
   } else if ((d.asama === 'sonuc' || d.asama === 'bitti') && d.sonuc && d.masa.length) {
     masaBaslik = '🔎 Kim hangi kartı attı, kim nereye oy verdi?';
     const s = d.sonuc;
