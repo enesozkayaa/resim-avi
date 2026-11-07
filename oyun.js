@@ -40,6 +40,9 @@ function ekranLobi() {
       b.disabled = !ev;
     });
   });
+  // Seçilen bitişe göre sadece ilgili satır görünür
+  document.querySelector('.secenek[data-ayar="hedef"]').hidden = ui.ayar?.bitis === 'tur';
+  document.querySelector('.secenek[data-ayar="kacKez"]').hidden = ui.ayar?.bitis !== 'tur';
   $('ayarNotu').textContent = ev ? '' : '(oda sahibi seçer)';
   $('baslatBtn').hidden = !ev;
   const hazir = oy.length >= Ag.EN_AZ;
@@ -52,7 +55,8 @@ document.querySelectorAll('.ayarlar .secenek').forEach(s => s.addEventListener('
   const b = e.target.closest('button[data-deger]');
   if (!b || b.disabled) return;
   Ses.sec();
-  Ag.lobiEylemGonder('ayar', { [s.dataset.ayar]: b.dataset.deger });
+  const sayi = ['hedef', 'kacKez'].includes(s.dataset.ayar);
+  Ag.lobiEylemGonder('ayar', { [s.dataset.ayar]: sayi ? +b.dataset.deger : b.dataset.deger });
 }));
 
 // ---------- Oyun durumu ----------
@@ -153,6 +157,13 @@ function ciz() {
     : d.asama === 'sonuc' ? durumMetni(d.sonuc?.durum)
     : d.asama === 'bitti' ? '🏆 Oyun bitti!'
     : '…';
+  // Hedef: kaç puan / kaçıncı tur
+  if (d.asama !== 'bitti') {
+    const yapilan = d.oyuncular.reduce((t, p) => t + p.anlatti, 0);
+    $('durumYazi').innerHTML += d.ayar.bitis === 'tur'
+      ? ` <small class="hedef">🔁 Tur ${Math.min(yapilan + (d.asama === 'sonuc' ? 0 : 1), n * d.ayar.kacKez)}/${n * d.ayar.kacKez}</small>`
+      : ` <small class="hedef">🏁 ${d.ayar.hedef} puan</small>`;
+  }
   // Söz
   $('sozKutusu').hidden = !d.soz;
   if (d.soz) $('sozKutusu').innerHTML = `<small>🗣️ ${guvenli(adi(d.anlatici))} diyor ki:</small><div class="soz">“${guvenli(d.soz)}”</div>`;

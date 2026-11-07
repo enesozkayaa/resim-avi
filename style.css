@@ -96,6 +96,7 @@ details li { margin: 6px 0; }
 .pOyuncu .kazanc { color: #8dff9b; font-weight: 900; }
 
 #durumYazi { text-align: center; font-size: 16px; padding: 7px; border-radius: 10px; background: #0005; }
+#durumYazi .hedef { margin-left: 6px; padding: 1px 7px; border-radius: 8px; background: #ffffff1a; font-size: 12px; white-space: nowrap; }
 #alan { flex: 1; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 
 /* Söz */

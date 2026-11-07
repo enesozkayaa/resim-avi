@@ -45,7 +45,7 @@ const Ag = (() => {
   function ayarOku() {
     let a = null;
     try { a = JSON.parse(localStorage.getItem(AYAR_ANAHTAR)); } catch (e) { /* yok */ }
-    return { bitis: a?.bitis === 'tur' ? 'tur' : 'puan' };
+    return { bitis: a?.bitis === 'tur' ? 'tur' : 'puan', hedef: [20, 30, 40, 50].includes(+a?.hedef) ? +a.hedef : 30, kacKez: [1, 2, 3].includes(+a?.kacKez) ? +a.kacKez : 2 };
   }
 
   const durumYaz = html => ($('onlineDurum').innerHTML = html);

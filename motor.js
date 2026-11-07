@@ -8,7 +8,7 @@
 //   - Puan: Herkes bulursa ya da kimse bulamazsa anlatıcı 0, diğerleri 2'şer alır.
 //           Yoksa anlatıcı ve bulanlar 3'er alır.
 //           Ayrıca kendi kartına gelen her oy için +1.
-//   - Bitiş (açılışta seçilir): 30 puana ilk ulaşan ya da herkes 2 kez anlatınca.
+//   - Bitiş (açılışta seçilir): 20/30/40/50 puana ilk ulaşan ya da herkes 1/2/3 kez anlatınca.
 // =============================================================
 
 const Motor = (() => {
@@ -40,13 +40,13 @@ const Motor = (() => {
     o.oyuncular.forEach(p => { while (p.el.length < EL && (o.deste.length || o.atilan.length)) p.el.push(kartCek()); });
   }
 
-  // oyuncular: [{ id, ad }], ayar: { bitis: 'puan' | 'tur' }
+  // oyuncular: [{ id, ad }], ayar: { bitis: 'puan' | 'tur', hedef: 20|30|40|50, kacKez: 1|2|3 }
   function yeni(oyuncular, dinleyici, ayar = {}) {
     clearTimeout(zaman);
     dinle = dinleyici;
     o = {
       oyuncular: oyuncular.map(p => ({ id: p.id, ad: p.ad, puan: 0, el: [], anlatti: 0 })),
-      ayar: { bitis: ayar.bitis === 'tur' ? 'tur' : 'puan', hedef: 30, kacKez: 2 },
+      ayar: { bitis: ayar.bitis === 'tur' ? 'tur' : 'puan', hedef: [20, 30, 40, 50].includes(+ayar.hedef) ? +ayar.hedef : 30, kacKez: [1, 2, 3].includes(+ayar.kacKez) ? +ayar.kacKez : 2 },
       deste: karistir([...RESIMLER]), atilan: [],
       anlaticiSira: Math.floor(Math.random() * oyuncular.length),
       turNo: 0, asama: 'soz', soz: '', oynanan: {}, masa: [], oylar: {}, sonuc: null, bitis: 0,
