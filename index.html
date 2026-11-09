@@ -40,6 +40,13 @@
         <div id="lobiListe"></div>
         <div class="ayarlar">
           <h3>⚙️ Oyun ayarları <small id="ayarNotu"></small></h3>
+          <div class="secenek" data-ayar="kartlar"><span>Hangi kartlarla oynansın?</span><button data-deger="foto">📷 Fotoğraflar</button><button data-deger="ozel">📁 Kendi kartlarım</button></div>
+          <div id="ozelAlan" hidden>
+            <p id="ozelBilgi"></p>
+            <label class="ikinciBtn dosyaBtn">📁 Kart resimlerini seç (hepsini birden)<input id="ozelDosya" type="file" accept="image/*" multiple hidden></label>
+            <button id="ozelTemizleBtn" class="ikinciBtn" hidden>🗑️ Kayıtlı kartları sil</button>
+            <p class="not">Resimler hiçbir siteye yüklenmez: sadece bu cihazda saklanır, oyun sırasında odadaki arkadaşlarına doğrudan gider.</p>
+          </div>
           <div class="secenek" data-ayar="bitis"><span>Oyun ne zaman bitsin?</span><button data-deger="puan">🏁 Puana ilk ulaşan kazanır</button><button data-deger="tur">🔁 Herkes anlatınca biter</button></div>
           <div class="secenek" data-ayar="hedef"><span>Kaç puana ulaşan kazansın?</span><button data-deger="20">20</button><button data-deger="30">30</button><button data-deger="40">40</button><button data-deger="50">50</button></div>
           <div class="secenek" data-ayar="kacKez"><span>Herkes kaç kez anlatsın?</span><button data-deger="1">1 kez</button><button data-deger="2">2 kez</button><button data-deger="3">3 kez</button></div>
@@ -137,6 +144,7 @@
 
   <script src="ses.js"></script>
   <script src="resimler.js"></script>
+  <script src="ozel.js"></script>
   <script src="motor.js"></script>
   <script src="oyun.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -144,6 +152,23 @@
   <script src="sayac.js"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+  </script>
+  <script>
+    // iPhone: ekran büyüyüp takılı kalmasın. Klavye kapanınca ya da telefon dönünce
+    // yakınlaştırma sıfırlanır; iki parmakla büyütme kapalı.
+    (function () {
+      var m = document.querySelector('meta[name=viewport]');
+      var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!m || !ios) return;
+      var asil = m.getAttribute('content');
+      function sifirla() {
+        m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no');
+        setTimeout(function () { m.setAttribute('content', asil); }, 400);
+      }
+      document.addEventListener('focusout', function (e) { if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) setTimeout(sifirla, 50); });
+      window.addEventListener('orientationchange', function () { setTimeout(sifirla, 300); });
+      ['gesturestart', 'gesturechange'].forEach(function (t) { document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false }); });
+    })();
   </script>
 </body>
 </html>

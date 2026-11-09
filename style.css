@@ -134,6 +134,11 @@ details li { margin: 6px 0; }
 #sonucAlt .ozet { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
 #sonucAlt .buyuk { width: auto; display: inline-block; padding: 10px 28px; }
 
+/* Kendi kartlarım */
+#ozelAlan { background: #ffffff10; border-radius: 10px; padding: 6px 10px 8px; margin: 4px 0 8px; }
+#ozelAlan p { margin: 4px 0; font-size: 14px; }
+.dosyaBtn { cursor: pointer; text-align: center; }
+
 /* Önizleme */
 .onizKutu { width: min(420px, 100%); text-align: center; }
 #onizResim { width: 100%; max-height: 62vh; object-fit: contain; border-radius: 14px; border: 6px solid var(--kart); background: var(--kart); box-shadow: 0 10px 40px #000; }
@@ -193,3 +198,7 @@ details li { margin: 6px 0; }
   .foto .sahip { font-size: 10px; }
   #lobiListe { grid-template-columns: 1fr 1fr; }
 }
+
+/* iPhone: yazı kutusuna dokununca ekran büyümesin (16px altı yazılar büyütme yapar), çift dokunuşla büyütme olmasın */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+input, select, textarea { font-size: max(16px, 1em); }

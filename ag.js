@@ -13,7 +13,7 @@
 // =============================================================
 
 const Ag = (() => {
-  const SURUM = 1;
+  const SURUM = 2;
   const ODA_ONEKI = 'resim-avi-oda-';
   const KOD_HARFLERI = 'ABCDEFGHJKLMNPRSTUVYZ23456789';
   const NABIZ_ARALIGI = 3000, NABIZ_ZAMAN_ASIMI = 15000;
@@ -45,7 +45,7 @@ const Ag = (() => {
   function ayarOku() {
     let a = null;
     try { a = JSON.parse(localStorage.getItem(AYAR_ANAHTAR)); } catch (e) { /* yok */ }
-    return { bitis: a?.bitis === 'tur' ? 'tur' : 'puan', hedef: [20, 30, 40, 50].includes(+a?.hedef) ? +a.hedef : 30, kacKez: [1, 2, 3].includes(+a?.kacKez) ? +a.kacKez : 2 };
+    return { kartlar: a?.kartlar === 'ozel' ? 'ozel' : 'foto', bitis: a?.bitis === 'tur' ? 'tur' : 'puan', hedef: [20, 30, 40, 50].includes(+a?.hedef) ? +a.hedef : 30, kacKez: [1, 2, 3].includes(+a?.kacKez) ? +a.kacKez : 2 };
   }
 
   const durumYaz = html => ($('onlineDurum').innerHTML = html);
@@ -209,13 +209,16 @@ const Ag = (() => {
     p.misafir = misafir;
     p.ses = false;
     misafir.id = p.id;
+    p.gonderilen = new Set();   // bu oyuncuya gönderilmiş kendi kart resimleri
     gonder(misafir, { tip: 'kabul', id: p.id, surum: SURUM });
     Ses.sec();
     sesListesiYay();
     lobiyiYay();
     if (ag.basladi) {
       // Geri dönen güncel durumu alır
-      gonder(misafir, { tip: 'durum', d: gorunum(p.id), olay: { tip: 'geriDondu' } });
+      const d = gorunum(p.id);
+      resimleriGonder(p, d);
+      gonder(misafir, { tip: 'durum', d, olay: { tip: 'geriDondu' } });
       sohbetDagit('', `${p.ad} oyuna geri döndü 👋`);
     }
   }
@@ -231,15 +234,20 @@ const Ag = (() => {
     lobiyiYay();
   }
 
-  // Oyun başlatılabilir mi: en az 3 kişi
+  // Kendi kartlarla oynamak için gereken en az kart: herkese 6 + bir tur
+  const ozelGerekli = n => Math.max(EN_AZ, n) * 7;
+  // Oyun başlatılabilir mi: en az 3 kişi (kendi kartlarsa yeterli kart da)
   function hazirMi() {
-    return ag.oyuncular.length >= EN_AZ;
+    if (ag.oyuncular.length < EN_AZ) return false;
+    return ag.ayar?.kartlar !== 'ozel' || Ozel.sayi >= ozelGerekli(ag.oyuncular.length);
   }
 
   function oyunuBaslat() {
     if (ag.mod !== 'ev' || !hazirMi()) return;
     ag.basladi = true;
-    Motor.yeni(ag.oyuncular.map(p => ({ id: p.id, ad: p.ad })), (t, v) => durumYay(t, v), ag.ayar);
+    ag.oyuncular.forEach(p => (p.gonderilen = new Set()));
+    const deste = ag.ayar.kartlar === 'ozel' ? Ozel.deste() : null;
+    Motor.yeni(ag.oyuncular.map(p => ({ id: p.id, ad: p.ad })), (t, v) => durumYay(t, v), { ...ag.ayar, deste });
     lobiyiYay();
     durumYay('basla');
     sohbetDagit('', 'Oyun başladı. İyi avlar! 📸');
@@ -263,9 +271,24 @@ const Ag = (() => {
     }
     return d;
   };
+  // Kendi kartlar: oyuncuya sadece göreceği kartların resmi (bir kez) gider
+  function resimleriGonder(p, d) {
+    if (!d || !p.misafir) return;
+    if (!p.gonderilen) p.gonderilen = new Set();
+    const gerekli = new Set([...d.el, ...d.masa, d.benimKart, d.sonuc?.dogruKart, ...(d.gecmis || []).map(g => g.kart)]);
+    gerekli.forEach(k => {
+      if (k === null || k === undefined || !Ozel.ozelMi(k) || p.gonderilen.has(k) || !Ozel.var(k)) return;
+      p.gonderilen.add(k);
+      gonder(p.misafir, { tip: 'resim', k, veri: Ozel.al(k) });
+    });
+  }
   function durumYay(t, v = {}) {
     if (ag.mod !== 'ev') return;
-    misafirler().forEach(p => gonder(p.misafir, { tip: 'durum', d: gorunum(p.id), olay: { tip: t, ...v } }));
+    misafirler().forEach(p => {
+      const d = gorunum(p.id);
+      resimleriGonder(p, d);
+      gonder(p.misafir, { tip: 'durum', d, olay: { tip: t, ...v } });
+    });
     durumGeldi(gorunum(kimlik), { tip: t, ...v });
   }
 
@@ -356,6 +379,9 @@ const Ag = (() => {
       kilitle(false);
       oturumuUnut();
       durumYaz(`❌ Odaya girilemedi: ${guvenli(m.neden ?? '')}`);
+    } else if (m?.tip === 'resim' && typeof m.veri === 'string' && m.veri.length < 2000000) {
+      Ozel.koy(+m.k, m.veri);
+      ozelResimGeldi();
     } else if (m?.tip === 'durum' && m.d) {
       if (typeof m.d.kalanMs === 'number') m.d.bitis = Date.now() + m.d.kalanMs;
       durumGeldi(m.d, m.olay || {});
@@ -527,7 +553,7 @@ const Ag = (() => {
   } catch (e) { /* yok */ }
 
   return {
-    eylem, lobiEylemGonder, oyunuBaslat, lobiyeDon, ayril, hazirMi, ayarOku, EN_AZ, EN_COK,
+    eylem, lobiEylemGonder, oyunuBaslat, lobiyeDon, ayril, hazirMi, ayarOku, EN_AZ, EN_COK, ozelGerekli,
     get mod() { return ag.mod; },
     get ben() { return kimlik; },
     sesteMi: id => ses.liste.some(x => x.id === id),

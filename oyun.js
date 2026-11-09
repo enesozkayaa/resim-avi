@@ -43,14 +43,52 @@ function ekranLobi() {
   // Seçilen bitişe göre sadece ilgili satır görünür
   document.querySelector('.secenek[data-ayar="hedef"]').hidden = ui.ayar?.bitis === 'tur';
   document.querySelector('.secenek[data-ayar="kacKez"]').hidden = ui.ayar?.bitis !== 'tur';
+  // Kendi kartlarım: sadece oda sahibi seçer, resimler onun cihazından gelir
+  const ozel = ui.ayar?.kartlar === 'ozel';
+  $('ozelAlan').hidden = !ozel;
+  if (ozel) {
+    const gerek = Ag.ozelGerekli(oy.length);
+    $('ozelBilgi').innerHTML = !ev ? '📁 Oda sahibinin kendi kartlarıyla oynanacak.'
+      : ui.ozelYukleniyor ? ui.ozelYukleniyor
+      : Ozel.sayi ? `✅ Bu cihazda <b>${Ozel.sayi}</b> kart kayıtlı.${Ozel.sayi < gerek ? ` <span class="uyari">${oy.length} kişi için en az ${gerek} kart lazım.</span>` : ''}`
+      : 'Henüz kart seçilmedi. Aşağıdan resimlerini seç.';
+    document.querySelector('.dosyaBtn').hidden = !ev;
+    $('ozelTemizleBtn').hidden = !ev || !Ozel.sayi;
+  }
   $('ayarNotu').textContent = ev ? '' : '(oda sahibi seçer)';
   $('baslatBtn').hidden = !ev;
   const hazir = oy.length >= Ag.EN_AZ;
-  $('baslatBtn').disabled = !hazir;
-  $('baslatNot').textContent = hazir ? (ev ? 'Herkes geldiyse başlat!' : '⏳ Oda sahibinin başlatması bekleniyor…')
-    : `Başlamak için en az ${Ag.EN_AZ} kişi lazım.`;
+  const kartTamam = !ozel || Ozel.sayi >= Ag.ozelGerekli(oy.length);
+  $('baslatBtn').disabled = !hazir || (ev && !kartTamam);
+  $('baslatNot').textContent = !hazir ? `Başlamak için en az ${Ag.EN_AZ} kişi lazım.`
+    : ev && !kartTamam ? 'Kendi kartlarınla oynamak için önce resimleri seç (ya da 📷 Fotoğraflar\'ı seç).'
+    : ev ? 'Herkes geldiyse başlat!' : '⏳ Oda sahibinin başlatması bekleniyor…';
 }
 $('baslatBtn').addEventListener('click', () => Ag.oyunuBaslat());
+$('ozelDosya').addEventListener('change', async e => {
+  const dosyalar = e.target.files;
+  if (!dosyalar?.length) return;
+  ui.ozelYukleniyor = '⏳ Resimler hazırlanıyor…';
+  ekranLobi();
+  try {
+    await Ozel.dosyalariAl(dosyalar, (i, n) => { ui.ozelYukleniyor = `⏳ Resimler hazırlanıyor… ${i}/${n}`; $('ozelBilgi').textContent = ui.ozelYukleniyor; });
+  } catch (err) { mesaj('Resimler kaydedilemedi 😕', 'kirmizi', 2500); }
+  ui.ozelYukleniyor = '';
+  e.target.value = '';
+  ekranLobi();
+});
+$('ozelTemizleBtn').addEventListener('click', async () => {
+  if (!confirm('Bu cihazdaki kendi kartların silinsin mi? (Sonra tekrar seçebilirsin)')) return;
+  await Ozel.temizle();
+  ekranLobi();
+});
+Ozel.yukleKayitli().then(() => { if (!$('lobi').hidden) ekranLobi(); });
+// Misafir: oda sahibinden gelen kart resmi sonradan gelirse ekranı yenile
+let resimYenile = null;
+function ozelResimGeldi() {
+  clearTimeout(resimYenile);
+  resimYenile = setTimeout(() => { $('el').dataset.html = ''; $('masa').dataset.html = ''; $('gecmisListe').dataset.html = ''; ciz(); }, 120);
+}
 document.querySelectorAll('.ayarlar .secenek').forEach(s => s.addEventListener('click', e => {
   const b = e.target.closest('button[data-deger]');
   if (!b || b.disabled) return;

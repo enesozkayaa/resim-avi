@@ -47,7 +47,7 @@ const Motor = (() => {
     o = {
       oyuncular: oyuncular.map(p => ({ id: p.id, ad: p.ad, puan: 0, el: [], anlatti: 0 })),
       ayar: { bitis: ayar.bitis === 'tur' ? 'tur' : 'puan', hedef: [20, 30, 40, 50].includes(+ayar.hedef) ? +ayar.hedef : 30, kacKez: [1, 2, 3].includes(+ayar.kacKez) ? +ayar.kacKez : 2 },
-      deste: karistir([...RESIMLER]), atilan: [],
+      deste: karistir([...(Array.isArray(ayar.deste) && ayar.deste.length ? ayar.deste : RESIMLER)]), atilan: [],
       anlaticiSira: Math.floor(Math.random() * oyuncular.length),
       turNo: 0, asama: 'soz', soz: '', oynanan: {}, masa: [], oylar: {}, sonuc: null, bitis: 0,
       gecmis: [], kazananlar: [],

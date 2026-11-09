@@ -6,9 +6,9 @@
 // Oyunu güncelleyip yüklerken ONBELLEK numarasını 1 artır.
 // =============================================================
 
-const ONBELLEK = 'resim-avi-v3';
+const ONBELLEK = 'resim-avi-v4';
 const DOSYALAR = [
-  './', 'index.html', 'style.css', 'ses.js', 'resimler.js', 'motor.js', 'oyun.js', 'ag.js', 'sayac.js',
+  './', 'index.html', 'style.css', 'ses.js', 'resimler.js', 'ozel.js', 'motor.js', 'oyun.js', 'ag.js', 'sayac.js',
   'manifest.webmanifest', 'ikonlar/ikon-192.png', 'ikonlar/ikon-512.png',
 ];
 
